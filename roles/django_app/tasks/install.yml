@@ -1,0 +1,34 @@
+---
+  - name: Garantir que o(a) {{ app_name|title }} está parado(a)
+    become: yes
+    service: name={{ company_slug }}-{{ app_name }} state=stopped enabled=yes
+    ignore_errors: True
+
+  - name: Criação do script de instalação
+    become: yes
+    become_user: {{ company_slug }}
+    template:
+      src=install.sh
+      dest=/opt/{{ company_slug }}/releases/{{ release_name }}/bin/install.sh
+      mode="0755"
+
+  - name: Instalação do(a) {{ app_name }}
+    become: yes
+    shell: "/opt/{{ company_slug }}/releases/{{ release_name }}/bin/install.sh > /tmp/{{ app_name }}-install.log 2>&1"
+    args:
+      executable: /bin/bash
+
+  - name: Criar /etc/init.d/{{ company_slug }}-{{ app_name }}
+    become: yes
+    template:
+      src=run.sh
+      dest=/etc/init.d/{{ company_slug }}-{{ app_name }}
+      mode="0755"
+      owner=root
+      group=root
+    vars:
+      service_title: "{{ company_slug }}-{{ app_name|title }}"
+
+  - name: Habilitar {{ company_slug }}-{{ app_name }} para iniciar automaticamente
+    become: yes
+    shell: /usr/sbin/update-rc.d {{ company_slug }}-{{ app_name }} start 20 3 4 5

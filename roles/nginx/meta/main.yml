@@ -1,0 +1,9 @@
+---
+galaxy_info:
+  author:
+  description:
+  company: Supplai
+  license: Private
+  min_ansible_version: 1.0
+dependencies: []
+

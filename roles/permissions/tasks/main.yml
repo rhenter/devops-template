@@ -1,0 +1,21 @@
+---
+- name: Creating groups
+  group: name={{ item }}
+  with_items:
+    - {{ company_slug }}
+
+- name: Giving sudo to {{ company_slug }} group
+  lineinfile: "dest=/etc/sudoers state=present regexp='^%{{ company_slug }}' line='%{{ company_slug }} ALL=(ALL) NOPASSWD: ALL'"
+
+# {{ company_slug }} team
+- user: name={{ item }} group={{ company_slug }} groups={{ company_slug }} shell=/bin/bash
+  with_items:
+    - "{{ operation_team }}"
+- authorized_key: user={{ item }} key="{{ lookup('file', item + '.id_rsa.pub') }}" exclusive=yes
+  with_items:
+    - "{{ operation_team }}"
+
+# removed users
+- user: name={{ item }} state=absent
+  with_items: "{{ removed_users }}"
+

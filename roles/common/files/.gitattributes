@@ -1,0 +1,3 @@
+*.rpm -crlf -diff -merge
+*.tar.gz -crlf -diff -merge
+*.tgz -crlf -diff -merge

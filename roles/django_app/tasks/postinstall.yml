@@ -1,0 +1,37 @@
+---
+  - name: Configurar logrotate -> uwsgi e nginx
+    become: yes
+    template:
+      src=app_logrotate
+      dest=/etc/logrotate.d/{{ app_name }}
+      mode="0755"
+      owner=root
+      group=root
+
+  - name: Atualizar crondaily
+    become: yes
+    template:
+      src=crondaily
+      dest=/etc/cron.daily/{{ app_name }}
+      mode="0755"
+      owner=root
+      group=root
+
+  - name: Listar todas as releases armazenadas no servidor
+    find:
+      paths: "/opt/{{ company_slug }}/releases/"
+      patterns: '{{ app_name }}*'
+      file_type: directory
+    register: releases_list
+
+  - name: Deixar somente as 2 ultimas releases
+    become: yes
+    file:
+      path: "{{ item.path }}"
+      state: absent
+    with_items: "{{ (releases_list.files | sort(attribute='ctime', reverse = True))[2:] | list }}"
+
+  - name: Remove o pacote da release baixada
+    file:
+      path: "/tmp/{{ release_name }}.tar.gz"
+      state: absent

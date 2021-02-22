@@ -1,0 +1,35 @@
+---
+  - name: Cria os diretorios base para a aplicação
+    become: yes
+    file:
+        path="{{ item }}"
+        state=directory
+        owner={{ company_slug }}
+        group={{ company_slug }}
+    with_items:
+        - /opt/{{ company_slug }}/conf/{{ app_name }}
+        - /opt/{{ company_slug }}/logs/{{ app_name }}
+        - /opt/{{ company_slug }}/data/{{ app_name }}
+        - /opt/{{ company_slug }}/releases/{{ release_name }}
+        - /opt/{{ company_slug }}/releases/{{ release_name }}/bin
+
+  - name: Checar se a release já está no servidor
+    stat: path="{{ release_file }}"
+    register: tmp_release_package
+
+  - name: Download da release desejada da aplicação
+    get_url:
+      url: "{{ download_link }}"
+      dest: /tmp/
+      mode: 0644
+    when: tmp_release_package.stat.exists == False
+
+  - name: Descompacta release desejada da aplicação
+    become: yes
+    become_user: {{ company_slug }}
+    unarchive:
+      src="{{ release_file }}"
+      dest="/opt/{{ company_slug }}/releases/{{ release_name }}"
+      copy=no
+      owner={{ company_slug }}
+      group={{ company_slug }}

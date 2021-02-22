@@ -1,0 +1,57 @@
+location ^~ /{{ app_alias }}/static {
+    access_log off;
+    alias  /opt/{{ company_slug }}/{{ app_name }}/collected_static/;
+
+    auth_basic off;
+    allow all;
+    gzip on;
+    gzip_types                text/plain text/css application/x-javascript text/xml application/xml application/json application/javascript;
+}
+
+location ^~ /{{ app_alias }}/media {
+    proxy_pass https://{{ company_slug }}-data.s3.amazonaws.com/{{ app_name }};
+    proxy_cache assets-cache;
+    proxy_cache_valid  200 302 10080m;
+    proxy_cache_valid  404      1m;
+
+    auth_basic off;
+    allow all;
+    gzip on;
+}
+
+location /{{ app_alias }}/ {
+    uwsgi_pass      {{ app_host }}:{{ app_port }};
+    include         /etc/nginx/uwsgi_params;
+    uwsgi_param     UWSGI_SCHEME $scheme;
+    uwsgi_param     SERVER_SOFTWARE    nginx/$nginx_version;
+
+    error_log syslog:server={{ lognit_url }},facility=local3,tag={{ env_name }}_{{ app_alias }},severity=debug;
+
+    access_log syslog:server=unix:/var/log/nginx.sock,nohostname;
+    access_log syslog:server={{ lognit_url }},facility=local3,tag={{ env_name }}_{{ app_alias }},severity=info full;
+
+    gzip  on;
+    gzip_types                text/plain text/css application/x-javascript text/xml application/xml application/json application/javascript;
+    add_header "X-UA-Compatible" "IE=Edge,chrome=1";
+    client_max_body_size 100m;
+
+    uwsgi_ignore_client_abort on;
+    uwsgi_connect_timeout 10;
+    uwsgi_read_timeout 60;
+    uwsgi_send_timeout 60;
+
+    uwsgi_intercept_errors on;
+}
+
+
+error_page 404 /404.html;
+location = /{{ app_alias }}/404.html {
+    root /opt/{{ company_slug }}/{{ app_name }}/collected_static/errors/;
+    internal;
+}
+
+error_page 500 502 503 504 /50x.html;
+location = /{{ app_alias }}/50x.html {
+    root /opt/{{ company_slug }}/{{ app_name }}/collected_static/errors/;
+    internal;
+}

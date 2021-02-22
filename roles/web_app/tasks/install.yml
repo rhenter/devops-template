@@ -1,0 +1,34 @@
+---
+  - name: Garantir que o supervisor está parado
+    become: yes
+    service: name=supervisor state=stopped enabled=yes
+    ignore_errors: True
+
+  - name: Criação do script de instalação
+    become: yes
+    become_user: {{ company_slug }}
+    template:
+      src=install.sh
+      dest=/opt/{{ company_slug }}/releases/{{ release_name }}/bin/install.sh
+      mode="0755"
+
+  - name: Instalação do(a) {{ app_name }}
+    become: yes
+    shell: "/opt/{{ company_slug }}/releases/{{ release_name }}/bin/install.sh > /tmp/{{ app_name }}-install.log 2>&1"
+    args:
+      executable: /bin/bash
+
+#  - name: Criar /etc/init.d/{{ app_name }}
+#    become: yes
+#    template:
+#      src=run.sh
+#      dest=/etc/init.d/{{ app_name }}
+#      mode="0755"
+#      owner=root
+#      group=root
+#    vars:
+#      service_title: "{{ app_name|title }}"
+#
+#  - name: Habilitar "{{ app_name }}" para iniciar automaticamente
+#    become: yes
+#    shell: /sbin/chkconfig --level 345 {{ app_name }} on

@@ -1,0 +1,87 @@
+---
+  - name: Criar arquivos de variaveis de ambiente
+    become: yes
+    become_user: {{ company_slug }}
+    template:
+      src=project.env
+      dest=/opt/{{ company_slug }}/releases/{{ release_name }}/.env
+
+  - name: Link do .env para a release atual
+    become: yes
+    become_user: {{ company_slug }}
+    file:
+      src=/opt/{{ company_slug }}/releases/{{ release_name }}/.env
+      dest=/opt/{{ company_slug }}/releases/{{ release_name }}/conf/env
+      state=link
+
+  - name: Criar uwsgi.ini
+    become: yes
+    become_user: {{ company_slug }}
+    template:
+      src=uwsgi.ini
+      dest=/opt/{{ company_slug }}/releases/{{ release_name }}/conf/uwsgi.ini
+
+  - name: Criar redis.conf
+    become: yes
+    become_user: {{ company_slug }}
+    template:
+      src=redis.conf
+      dest=/opt/{{ company_slug }}/releases/{{ release_name }}/conf/redis.conf
+    when:
+      - has_celery
+
+  - name: Configurações nginx
+    become: yes
+    template:
+      src=nginx
+      dest=/etc/nginx/conf.d/{{ app_name }}.conf
+    when:
+      - not sub_app
+
+  - name: Checar se o certificado ja foi criado
+    become: yes
+    stat: path="/etc/letsencrypt/live/{{ app_server_host }}"
+    register: certificate_path
+
+  - debug: var=certificate_path.stat.exists
+
+  - name: Stop Web Server Service (nginx)
+    become: yes
+    service: name=nginx state=stopped
+    when:
+      - not sub_app
+      - certificate_path.stat.exists == False
+
+  - debug: msg="{{ app_server_host }}"
+  ##
+  # SSL: Configurar let's encrypt e obter certificado
+  - include: roles/letsencrypt/tasks/main.yml
+    vars:
+      domain: "{{ item }}"
+      registration_email: "{{ letsencrypt_registration_email }}"
+    with_items:
+      - "{{ app_server_host }}"
+    when:
+      - not sub_app
+      - certificate_path.stat.exists == False
+
+  - name: Start Web Server Service (nginx)
+    become: yes
+    service: name=nginx state=started
+    when:
+      - not sub_app
+      - certificate_path.stat.exists == False
+
+  - name: Configurações nginx
+    become: yes
+    template:
+      src={{ app_name }}.nginx
+      dest=/etc/nginx/conf.d/{{ app_name }}.nginx
+    when:
+      - sub_app
+
+  - name: Configuração do libmagic
+    become: yes
+    template:
+      src=magic.conf
+      dest=/etc/magic

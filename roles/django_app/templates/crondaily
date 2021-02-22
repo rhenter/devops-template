@@ -1,0 +1,22 @@
+#!/bin/bash
+APP_NAME="{{ app_name }}"
+S3_PATH="{{ company_slug }}-backups/"
+BACKUP_FILE_PATH="/opt/{{ company_slug }}/data/{{ app_name }}-sql-$(date +'%Y%m%d%H%M').gz"
+PGUSER="{{ database_user }}"
+PGPASSWORD="{{ database_password }}"
+DATABASE_NAME="{{ database_name }}"
+DATABASE_HOST="{{ database_host }}"
+
+# Backup Local
+PGPASSWORD=${PGPASSWORD} pg_dump -U ${PGUSER} --no-owner --no-acl -h ${DATABASE_HOST} -Fp -v -d ${DATABASE_NAME} | gzip > ${BACKUP_FILE_PATH}
+EXITVALUE=$?
+if [ $EXITVALUE != 0 ]; then
+    /usr/bin/logger -t ${APP_NAME} "ALERT pg_dump exited abnormally with [$EXITVALUE]"
+fi
+
+# Send the Backup to S3
+aws s3 cp ${BACKUP_FILE_PATH} s3://${S3_PATH}
+if [ $EXITVALUE != 0 ]; then
+    /usr/bin/logger -t ${APP_NAME} "ALERT AWSCLI send to S3 exited abnormally with [$EXITVALUE]"
+fi
+exit 0

@@ -1,0 +1,29 @@
+
+---
+  - name: Adiciona repositorio
+    become: yes
+    apt_repository:
+      repo: "{{ item }}"
+    with_items:
+      - ppa:certbot/certbot
+
+  - name: Instalar certbot-nginx
+    become: yes
+    apt:
+      name: python-certbot-nginx
+      state: present
+
+  - name: Registro no let's encrypt
+    become: yes
+    shell: "/usr/bin/certbot register -n -m {{ registration_email }} --no-eff-email --agree-tos"
+    ignore_errors: True
+
+  - name: Gerar certificado
+    become: yes
+    shell: "/usr/bin/certbot certonly -n --standalone --keep-until-expiring --agree-tos -d {{ domain }}"
+    ignore_errors: True
+
+  - name: Adicionar renovação do certificado ao crondaily
+    become: yes
+    template: src=roles/letsencrypt/templates/crondaily dest=/etc/cron.daily/letsencrypt mode="0755" owner=root group=root
+    ignore_errors: True

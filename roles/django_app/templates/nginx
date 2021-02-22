@@ -1,0 +1,88 @@
+server {
+        listen          80;
+        server_name     {{ app_server_host }}  {{ app_server_host_secondary }};
+        charset     utf-8;
+
+        rewrite ^ https://$host$request_uri? permanent;
+}
+server {
+        listen          443 ssl;
+        server_name     {{ app_server_host }};
+        charset         utf-8;
+        access_log      /opt/{{ company_slug }}/logs/{{ app_name }}/{{ app_name }}.main.log main;
+        error_log       /opt/{{ company_slug }}/logs/{{ app_name }}/{{ app_name }}.error.log;
+
+        ssl on;
+        ssl_protocols TLSv1.2 TLSv1.1 TLSv1; # Score=95 (recommended)
+        ssl_dhparam /etc/nginx/dhparam.pem;
+
+        ssl_ciphers 'kEECDH+ECDSA+AES128 kEECDH+ECDSA+AES256 kEECDH+AES128 kEECDH+AES256 kEDH+AES128 kEDH+AES256 DES-CBC3-SHA +SHA !aNULL !eNULL !LOW !kECDH !DSS !MD5 !RC4 !EXP !PSK !SRP !CAMELLIA !SEED';
+        # ssl_ciphers AES256+EECDH:AES256+EDH:!aNULL;
+
+        ssl_certificate         /etc/letsencrypt/live/{{ app_server_host }}/fullchain.pem;
+        ssl_certificate_key     /etc/letsencrypt/live/{{ app_server_host }}/privkey.pem;
+        ssl_prefer_server_ciphers on;
+        ssl_session_cache shared:SSL:10m;
+        ssl_session_timeout 10m;
+
+        add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
+        keepalive_timeout    70;
+
+        # OCSP stapling
+        # ssl_stapling on;
+        # ssl_stapling_verify on;
+        # #ssl_trusted_certificate /path/to/certificate/ssl.crt;
+        #the CA & Intermediate CA file for your cert
+        # resolver 8.8.8.8 8.8.4.4 valid=300s; #Google DNS
+        #resolver_timeout 10s;
+
+        location / {
+            uwsgi_pass      {{ app_host }}:{{ app_port }};
+            include         /etc/nginx/uwsgi_params;
+            uwsgi_param     UWSGI_SCHEME $scheme;
+            uwsgi_param     SERVER_SOFTWARE    nginx/$nginx_version;
+
+            gzip  on;
+            gzip_types                text/plain text/css application/x-javascript text/xml application/xml application/json application/javascript;
+            add_header "X-UA-Compatible" "IE=Edge,chrome=1";
+            client_max_body_size 100m;
+
+#            uwsgi_ignore_client_abort on;
+#            uwsgi_connect_timeout 10;
+#            uwsgi_read_timeout 10;
+#            uwsgi_send_timeout 10;
+#            uwsgi_intercept_errors on;
+        }
+
+#        error_page 404 /404.html;
+#        location = /404.html {
+#            root /opt/{{ company_slug }}/{{ app_name }}/django/staticfiles /errors/;
+#            internal;
+#        }
+
+#       error_page 500 502 503 504 /50x.html;
+#        location = /50x.html {
+#            root /opt/{{ company_slug }}/{{ app_name }}/django/staticfiles /errors/;
+#            internal;
+#        }
+
+        location ^~ /static {
+            access_log off;
+            alias  /opt/{{ company_slug }}/{{ app_name }}/django/staticfiles/;
+
+            auth_basic off;
+            allow all;
+            gzip on;
+            gzip_types                text/plain text/css application/x-javascript text/xml application/xml application/json application/javascript;
+        }
+
+        location ^~ /media {
+            access_log off;
+            alias  /opt/{{ company_slug }}/data/{{ app_name }}/;
+
+            auth_basic off;
+            allow all;
+            gzip on;
+        }
+
+}

@@ -1,0 +1,46 @@
+---
+- name: Cria usuários para os membros da equipe
+  hosts: "*"
+  become: yes
+  roles:
+    - {"name": "permissions", "tags": "permissions"}
+
+- name: Prepara ambiente para instalação das aplicações da {{ company_slug }}
+  hosts: "*"
+  become: yes
+  roles:
+    - {"name": "common", "tags": "common"}
+    - {"name": "nginx", "tags": "nginx"}
+
+
+- name: Instala a App Django
+  hosts: "*"
+  tasks:
+    - name: Enviando as configurações a aplicação para iniciar o deploy
+      include_role:
+        name: django_app
+      vars:
+        app_alias: "{{ api_app_alias }}"
+        app_name: "{{ api_app_name }}"
+        app_host: "{{ api_app_host }}"
+        app_port: "{{ api_app_port }}"
+        app_version: "{{ api_app_version }}"
+        app_server_host: "{{ api_server_host }}"
+        app_server_host_secondary: "{{ api_server_host_secondary }}"
+        app_server_internal_host: "{{ api_server_internal_host }}"
+        client_id: "{{ api_client_id }}"
+        client_secret: "{{ api_client_secret }}"
+        database_host: "{{ api_database_host }}"
+        database_port: "{{ api_database_port }}"
+        database_name: "{{ api_database_name }}"
+        database_user: "{{ api_database_user }}"
+        database_password: "{{ api_database_password }}"
+        django_folder: "{{ api_django_folder }}"
+        django_secret_key: "{{ api_django_secret_key }}"
+        django_settings: "{{ api_django_settings }}"
+        redis_database: "{{ api_redis_database }}"
+        redis_host: "{{ api_redis_host }}"
+        redis_port: "{{ api_redis_port }}"
+        stats_port: "{{ api_stats_port }}"
+        has_celery: "{{ api_has_celery }}"
+  tags: [ 'django' ]

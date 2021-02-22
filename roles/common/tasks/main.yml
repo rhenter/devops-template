@@ -1,0 +1,7 @@
+---
+  - include: server_user.yml
+
+  - include: system_deps.yml
+
+  - include: pyenv.yml
+#  - include: python36.yml

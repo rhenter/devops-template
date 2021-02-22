@@ -1,0 +1,10 @@
+---
+# defaults file for iws_app
+app_name: ''
+client_id: ''
+client_secret: ''
+release_name: '{{ app_name }}-{{ app_version }}'
+release_file: '/tmp/{{ app_name }}-{{ app_version }}.tar.gz'
+redis_database: 0
+download_link: 'https://deploy.s3.amazonaws.com/{{ app_name }}/{{ app_name }}-{{ app_version }}.tar.gz'
+sub_app: False

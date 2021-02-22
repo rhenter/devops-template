@@ -1,0 +1,21 @@
+---
+#  - name: Criar /opt/{{ company_slug }}/runtime/python36
+#    become: yes
+#    file: path=/opt/{{ company_slug }}/runtime/python36 state=directory owner={{ company_slug }} group={{ company_slug }}
+#
+#  - name: Checar se o python36 já está instalado
+#    stat: path=/opt/{{ company_slug }}/runtime/python36/bin/python3.6
+#    register: tmp_py36
+#
+#  - name: Instalar python 3.6
+#    become: yes
+#    become_user: {{ company_slug }}
+#    unarchive: src=python-3.6.2.tar.gz dest=/opt/{{ company_slug }}/runtime/ remote_src=no
+#    when: tmp_py36.stat.exists == False
+    - name: "Instala o PIP para todos os usuarios"
+      become: yes
+      command: "{{ item }}"
+      with_items:
+          - curl -O https://bootstrap.pypa.io/get-pip.py
+          - python3.6 get-pip.py
+

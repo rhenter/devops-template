@@ -1,0 +1,20 @@
+---
+- name: start {{ app_name }}
+  become: yes
+  service: name={{ app_name }} state=started enabled=yes
+  listen: "start app service"
+
+- name: restart {{ app_name }}
+  become: yes
+  service: name={{ app_name }} state=restarted
+  listen: "restart app service"
+
+- name: stop {{ app_name }}
+  become: yes
+  service: name={{ app_name }} state=stopped
+  listen: "stop app service"
+
+- name: Restart Web Server Service (nginx)
+  become: yes
+  service: name=nginx state=reloaded enabled=yes
+  listen: "restart web services"

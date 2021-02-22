@@ -1,0 +1,36 @@
+---
+  - name: Criar /opt/{{ company_slug }}/runtime
+    become: yes
+    file: path=/opt/{{ company_slug }}/runtime state=directory owner={{ company_slug }} group={{ company_slug }}
+
+  - name: git clone pyenv , pyenv-virtualenv
+    become_user: {{ company_slug }}
+    git:
+      repo: '{{ item.repo }}'
+      dest: '{{ item.dest }}'
+    register: RESULT
+    with_items:
+      - repo: git://github.com/yyuu/pyenv.git
+        dest: /opt/{{ company_slug }}/runtime/pyenv
+      - repo: git://github.com/yyuu/pyenv-virtualenv.git
+        dest: /opt/{{ company_slug }}/runtime/pyenv/plugins/pyenv-virtualenv
+  - name: results
+    debug: var=RESULT.results
+
+  - name: "install pyenv and python ver.{{ python_ver }}"
+    become_user: {{ company_slug }}
+    shell: '{{ item.cmd }}'
+    register: RESULT
+    with_items:
+      - cmd: echo 'export PYENV_ROOT="/opt/{{ company_slug }}/runtime/pyenv"' >> ~/.bashrc
+      - cmd: echo 'if [ -d "${PYENV_ROOT}" ]; then' >> ~/.bashrc
+      - cmd: echo '    export PATH=${PYENV_ROOT}/bin:$PATH' >> ~/.bashrc
+      - cmd: echo '    eval "$(pyenv init -)"' >> ~/.bashrc
+      - cmd: echo 'fi' >> ~/.bashrc
+      - cmd: source ~/.bashrc; pyenv -v
+      - cmd: source ~/.bashrc; python -V
+      - cmd: source ~/.bashrc; pyenv install '{{ python_version }}'
+      - cmd: source ~/.bashrc; pyenv global '{{ python_version }}'
+      - cmd: source ~/.bashrc; python -V
+  - name: results
+    debug: var=RESULT.results

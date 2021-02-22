@@ -1,0 +1,43 @@
+---
+  - name: Deploy do(a) {{ app_name }}
+    debug:
+      msg: "{{ app_name }} - {{ app_version }}"
+
+  - name: Identificando o usuario que esta fazendo o deploy
+    become: false
+    local_action: command whoami
+    register: username
+
+  - name: Setting env var fact
+    set_fact:
+      slack_text: "Realizando o Deploy do {{ app_name }}-{{ app_version }} em {{ env_name }} por {{ username.stdout }}"
+
+#  - name: Notificando no Slack do deploy
+#    shell: "curl -X POST --data-urlencode 'payload={\"username\": \"DevOps\", \"text\": \"{{ slack_text }}\"}' {{ slack_url }}"
+#    args:
+#      executable: /bin/bash
+
+  - name: Preparando o Ambiente para a instalação
+    include: preinstall.yml
+
+  - name: Iniciando a configuração do sistema
+    include: configure.yml
+
+  - name: Iniciando a instalação do Aplicação como Serviço
+    include: install.yml
+
+  - name: Garantir que o {{ company_slug }}-{{ app_name }} está em execução
+    become: yes
+    service: name={{ company_slug }}-{{ app_name }} state=started enabled=yes
+
+  - name: Restart Web Server Service (nginx)
+    become: yes
+    service: name=nginx state=reloaded enabled=yes
+
+  - name: Configurando o backup da base e adiciona no crontab
+    include: postinstall.yml
+
+#  - name: Notificando no Slack o termino do deploy
+#    shell: "curl -X POST --data-urlencode 'payload={\"username\": \"DevOps\", \"text\": \"Deploy do {{ app_name }} feito.\"}' {{ slack_url }}"
+#    args:
+#      executable: /bin/bash

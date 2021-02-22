@@ -1,0 +1,25 @@
+---
+  - name: Deploy do(a) {{ app_name }}
+    debug:
+      msg: "{{ app_name }} - {{ app_version }}"
+
+  - name: Preparando o Ambiente para a instalação
+    include: preinstall.yml
+
+  - name: Iniciando a configuração do sistema
+    include: configure.yml
+
+  - name: Iniciando a instalação do Aplicação como Serviço
+    include: install.yml
+
+  - name: Iniciar o Supervisor
+    become: yes
+    service: name=supervisor state=started enabled=yes
+    ignore_errors: True
+
+  - name: Restart Web Server Service (nginx)
+    become: yes
+    service: name=nginx state=reloaded enabled=yes
+
+  - name: Configurando o backup da base e adiciona no crontab
+    include: postinstall.yml

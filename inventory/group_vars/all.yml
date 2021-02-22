@@ -1,0 +1,8 @@
+# timezone
+ntp_enabled: true
+ntp_timezone: America/Sao_Paulo
+
+operation_team:
+  -
+
+removed_users:

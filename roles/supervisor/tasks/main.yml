@@ -1,0 +1,29 @@
+
+---
+  - name: Instalar supervisor
+    apt:
+      name: supervisor
+      state: present
+
+  - name: Garantir que o supervisor está parado
+    become: yes
+    service: name=supervisor state=stopped enabled=yes
+    ignore_errors: True
+
+  - name: Remover as instancias atuais
+    become: yes
+    shell: "rm -rf /etc/supervisor/conf.d/{{ app_name }}*"
+    ignore_errors: True
+
+  - name: Criar instancias do App
+    become: yes
+    template:
+      src=app.conf
+      dest=/etc/supervisor/conf.d/{{ app_name }}-800{{ item }}.conf
+    vars:
+      app_name: "{{ app_name }}"
+      app_instance_sequence: "{{ item }}"
+      app_instance_port: "800{{ item }}"
+    with_sequence: count={{ total_instances }}
+
+

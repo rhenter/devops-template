@@ -1,0 +1,6 @@
+*~
+*.swp
+*.retry
+roles/bennojoy.ntp
+roles/blackstar257.selinux
+.idea

@@ -1,0 +1,17 @@
+---
+  - name: Cria {{ company_slug }} group
+    become: yes
+    group: name={{ company_slug }} state=present
+
+  - name: Cria {{ company_slug }} user
+    become: yes
+    user: name={{ company_slug }} group={{ company_slug }}
+
+  - name: Cria diretorios bases
+    become: yes
+    file: path="{{ item }}" state=directory owner={{ company_slug }} group={{ company_slug }} mode="0775"
+    with_items:
+        - /opt/{{ company_slug }}/logs
+        - /opt/{{ company_slug }}/data
+        - /opt/{{ company_slug }}/releases
+        - /opt/{{ company_slug }}/conf

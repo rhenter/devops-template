@@ -1,0 +1,9 @@
+---
+galaxy_info:
+  author: Rafael Henter
+  description: user provisioning
+  company: Henter S
+  license: Private
+  min_ansible_version: 1.0
+dependencies: []
+

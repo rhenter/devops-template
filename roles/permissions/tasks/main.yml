@@ -1,8 +1,6 @@
 ---
 - name: Creating groups
-  group: name={{ item }}
-  with_items:
-    - {{ company_slug }}
+  group: name={{ company_slug }}
 
 - name: Giving sudo to {{ company_slug }} group
   lineinfile: "dest=/etc/sudoers state=present regexp='^%{{ company_slug }}' line='%{{ company_slug }} ALL=(ALL) NOPASSWD: ALL'"

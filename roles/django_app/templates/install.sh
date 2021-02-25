@@ -9,10 +9,11 @@ PYTHON_BASE=$(which python)
 USER=$(whoami)
 # Paths
 BASE="/opt/{{ company_slug }}"
+RELEASE_NAME="{{ release_name }}"
 RELEASE_DIR="${BASE}/releases/{{ release_name }}"
 DJANGO_FOLDER="${RELEASE_DIR}/{{ django_folder }}"
 PYTHON_VENV="${RELEASE_DIR}/bin/python"
-VIRTUALENV="/opt/{{ company_slug }}/runtime/pyenv/shims/virtualenv"
+PYTHON_BIN="/opt/{{ company_slug }}/runtime/pyenv/shims/python"
 DUMP_NAME=${BASE}/data/${APP_NAME}/postinstall-${DATABASE_NAME}-sql-$(date +"%Y%m%d%H%M").gz
 
 # Print Format
@@ -34,7 +35,7 @@ if [ ! -f $PYTHON_BASE ]; then
 fi
 
 pushd ${RELEASE_DIR}
-. ${RELEASE_DIR}/.env
+#. ${RELEASE_DIR}/.env
 
 echo
 echo "${DEFAULT_TRACE_PRINT}"
@@ -72,7 +73,7 @@ echo
 source ${RELEASE_DIR}/bin/activate
 if [ $? -ne 0 ]; then
     echo "Versão Nova, Criando venv no diretorio de release."
-    ${VIRTUALENV} ${RELEASE_DIR}
+    ${PYTHON_BIN} -m venv ${RELEASE_DIR}
     if [ $? -ne 0 ]; then
       echo "VIRTUALENV zoado. $retval"
       exit 1

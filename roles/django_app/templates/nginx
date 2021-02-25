@@ -1,6 +1,6 @@
 server {
         listen          80;
-        server_name     {{ app_server_host }}  {{ app_server_host_secondary }};
+        server_name     {{ app_server_host }}  {% if app_server_host_secondary %}{{ app_server_host_secondary }}{% endif %};
         charset     utf-8;
 
         rewrite ^ https://$host$request_uri? permanent;
@@ -12,7 +12,7 @@ server {
         access_log      /opt/{{ company_slug }}/logs/{{ app_name }}/{{ app_name }}.main.log main;
         error_log       /opt/{{ company_slug }}/logs/{{ app_name }}/{{ app_name }}.error.log;
 
-        ssl on;
+        # ssl on;
         ssl_protocols TLSv1.2 TLSv1.1 TLSv1; # Score=95 (recommended)
         ssl_dhparam /etc/nginx/dhparam.pem;
 
@@ -47,24 +47,24 @@ server {
             add_header "X-UA-Compatible" "IE=Edge,chrome=1";
             client_max_body_size 100m;
 
-#            uwsgi_ignore_client_abort on;
-#            uwsgi_connect_timeout 10;
-#            uwsgi_read_timeout 10;
-#            uwsgi_send_timeout 10;
-#            uwsgi_intercept_errors on;
+            uwsgi_ignore_client_abort on;
+            uwsgi_connect_timeout 10;
+            uwsgi_read_timeout 10;
+            uwsgi_send_timeout 10;
+            uwsgi_intercept_errors on;
         }
 
-#        error_page 404 /404.html;
-#        location = /404.html {
-#            root /opt/{{ company_slug }}/{{ app_name }}/django/staticfiles /errors/;
-#            internal;
-#        }
+         #error_page 404 /404.html;
+         #location = /404.html {
+         #    root /opt/{{ company_slug }}/{{ app_name }}/django/staticfiles /errors/;
+         #    internal;
+         #}
 
-#       error_page 500 502 503 504 /50x.html;
-#        location = /50x.html {
-#            root /opt/{{ company_slug }}/{{ app_name }}/django/staticfiles /errors/;
-#            internal;
-#        }
+         #error_page 500 502 503 504 /50x.html;
+         #location = /50x.html {
+         #    root /opt/{{ company_slug }}/{{ app_name }}/django/staticfiles /errors/;
+         #    internal;
+         #}
 
         location ^~ /static {
             access_log off;

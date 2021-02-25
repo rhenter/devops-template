@@ -1,14 +1,12 @@
 ---
   - name: Criar arquivos de variaveis de ambiente
     become: yes
-    become_user: {{ company_slug }}
     template:
-      src=project.env
+      src=envvars/{{ app_name }}.env
       dest=/opt/{{ company_slug }}/releases/{{ release_name }}/.env
 
   - name: Link do .env para a release atual
     become: yes
-    become_user: {{ company_slug }}
     file:
       src=/opt/{{ company_slug }}/releases/{{ release_name }}/.env
       dest=/opt/{{ company_slug }}/releases/{{ release_name }}/conf/env
@@ -16,14 +14,12 @@
 
   - name: Criar uwsgi.ini
     become: yes
-    become_user: {{ company_slug }}
     template:
       src=uwsgi.ini
       dest=/opt/{{ company_slug }}/releases/{{ release_name }}/conf/uwsgi.ini
 
   - name: Criar redis.conf
     become: yes
-    become_user: {{ company_slug }}
     template:
       src=redis.conf
       dest=/opt/{{ company_slug }}/releases/{{ release_name }}/conf/redis.conf
@@ -37,6 +33,15 @@
       dest=/etc/nginx/conf.d/{{ app_name }}.conf
     when:
       - not sub_app
+
+  - name: Configurações nginx - Redirect
+    become: yes
+    template:
+      src=nginx_redirect
+      dest=/etc/nginx/conf.d/{{ app_name }}_redirect.conf
+    when:
+      - not sub_app
+      - has_www_redirect
 
   - name: Checar se o certificado ja foi criado
     become: yes
@@ -53,14 +58,22 @@
       - certificate_path.stat.exists == False
 
   - debug: msg="{{ app_server_host }}"
-  ##
+
+  # SSL: Configurar let's encrypt e obter certificado do www
+  - include: roles/letsencrypt/tasks/main.yml
+    vars:
+      domain: "{{ base_domain_server_host }}"
+      registration_email: "{{ letsencrypt_registration_email }}"
+    when:
+      - not sub_app
+      - certificate_path.stat.exists == False
+      - has_www_redirect
+
   # SSL: Configurar let's encrypt e obter certificado
   - include: roles/letsencrypt/tasks/main.yml
     vars:
-      domain: "{{ item }}"
+      domain: "{{ app_server_host }}"
       registration_email: "{{ letsencrypt_registration_email }}"
-    with_items:
-      - "{{ app_server_host }}"
     when:
       - not sub_app
       - certificate_path.stat.exists == False
@@ -75,7 +88,7 @@
   - name: Configurações nginx
     become: yes
     template:
-      src={{ app_name }}.nginx
+      src=nginx
       dest=/etc/nginx/conf.d/{{ app_name }}.nginx
     when:
       - sub_app

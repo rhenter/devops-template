@@ -5,7 +5,7 @@
 
   - name: Cria {{ company_slug }} user
     become: yes
-    user: name={{ company_slug }} group={{ company_slug }}
+    user: name={{ company_slug }} group={{ company_slug }} shell=/bin/bash
 
   - name: Cria diretorios bases
     become: yes

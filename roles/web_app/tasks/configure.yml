@@ -1,14 +1,14 @@
 ---
   - name: Criar arquivos de variaveis de ambiente
     become: yes
-    become_user: {{ company_slug }}
+    become_user: "{{ company_slug }}"
     template:
       src={{ app_name }}.env
       dest=/opt/{{ company_slug }}/releases/{{ release_name }}/.env
 
   - name: Link do .env para a release atual
     become: yes
-    become_user: {{ company_slug }}
+    become_user: "{{ company_slug }}"
     file:
       src=/opt/{{ company_slug }}/releases/{{ release_name }}/.env
       dest=/opt/{{ company_slug }}/conf/{{ app_name }}/env

@@ -2,6 +2,12 @@
 - apt_repository:
     repo: ppa:deadsnakes/ppa
 
+- name: Atualiza o SO antes de instalar as dependencias
+  apt:
+    name: "*"
+    state: latest
+    update_cache: yes
+
 - name: Instalar dependencias comuns a todas as apps
   apt:
     name: "{{ packages }}"
@@ -9,37 +15,26 @@
     packages:
       - git
       - build-essential
+      - bzip2
+      - openssl
       - xz-utils
       - libncurses5-dev
       - curl
       - libsqlite3-dev
       - libffi-dev
       - libssl-dev
-      - bzip2
-      - mysql-client
-      - readline-common
-      - openssl
-      - zlib1g-dev
-      - supervisor
-      - wget
       - libgdbm-dev
       - libnss3-dev
       - libreadline-dev
       - libbz2-dev
+      - readline-common
+      - zlib1g-dev
+      - wget
+      - python-dev
       - python3.8-dev
       - python3.8
       - python3-psycopg2
       - python-apt
       - redis-server
       - apache2-dev
-      - binutils
-      - libgeos-dev
-      - gdal-bin
-      - libgdal-dev
-      - proj-bin
-      - redis-server
     state: present
-
-
-
-

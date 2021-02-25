@@ -1,9 +1,30 @@
 ---
+app_alias: ''
 app_name: ''
+app_host: ''
+app_port: ''
+app_version: ''
+app_server_host: ''
+app_server_internal_host: ''
+app_server_host_secondary: ''
 client_id: ''
 client_secret: ''
-release_name: '{{ app_name }}-{{ app_version }}'
-release_file: '/tmp/{{ app_name }}-{{ app_version }}.tar.gz'
+database_host: ''
+database_port: ''
+database_name: ''
+database_user: ''
+database_password: ''
+django_folder: ''
+django_secret_key: ''
+django_settings: ''
 redis_database: 0
-download_link: 'https://deploy.s3.amazonaws.com/{{ app_name }}/{{ app_name }}-{{ app_version }}.tar.gz'
+redis_host: ''
+redis_port: ''
+stats_port: ''
+has_celery: ''
+has_www_redirect: False
 sub_app: False
+
+download_link: 'https://deploy.s3.amazonaws.com/{{ app_name }}/{{ app_name }}-{{ app_version }}.tar.gz'
+release_file: '/tmp/{{ app_name }}-{{ app_version }}.tar.gz'
+release_name: '{{ app_name }}-{{ app_version }}'

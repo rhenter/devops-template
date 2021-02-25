@@ -1,24 +1,21 @@
 
 ---
-  - name: Adiciona repositorio
-    become: yes
-    apt_repository:
-      repo: "{{ item }}"
-    with_items:
-      - ppa:certbot/certbot
-
   - name: Instalar certbot-nginx
     become: yes
     apt:
-      name: python-certbot-nginx
+      name: "{{ packages }}"
       state: present
+    vars:
+      packages:
+        - certbot
+        - python3-certbot-nginx
 
   - name: Registro no let's encrypt
     become: yes
     shell: "/usr/bin/certbot register -n -m {{ registration_email }} --no-eff-email --agree-tos"
     ignore_errors: True
 
-  - name: Gerar certificado
+  - name: Gerar certificado para {{ domain }}
     become: yes
     shell: "/usr/bin/certbot certonly -n --standalone --keep-until-expiring --agree-tos -d {{ domain }}"
     ignore_errors: True

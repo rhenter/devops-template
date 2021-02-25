@@ -11,9 +11,9 @@
   roles:
     - {"name": "common", "tags": "common"}
     - {"name": "nginx", "tags": "nginx"}
+    - {"name": "geerlingguy.postgresql", "tags": "postgresql"}
 
-
-- name: Instala a App Django
+- name: Instala a API
   hosts: "*"
   tasks:
     - name: Enviando as configurações a aplicação para iniciar o deploy
@@ -25,9 +25,8 @@
         app_host: "{{ api_app_host }}"
         app_port: "{{ api_app_port }}"
         app_version: "{{ api_app_version }}"
-        app_server_host: "{{ api_server_host }}"
-        app_server_host_secondary: "{{ api_server_host_secondary }}"
-        app_server_internal_host: "{{ api_server_internal_host }}"
+        app_server_host: "{{ api_host }}"
+        app_server_internal_host: "{{ api_internal_host }}"
         client_id: "{{ api_client_id }}"
         client_secret: "{{ api_client_secret }}"
         database_host: "{{ api_database_host }}"
@@ -43,4 +42,68 @@
         redis_port: "{{ api_redis_port }}"
         stats_port: "{{ api_stats_port }}"
         has_celery: "{{ api_has_celery }}"
-  tags: [ 'django' ]
+  tags: [ 'api' ]
+
+- name: Instala o Admin
+  hosts: "*"
+  tasks:
+    - name: Enviando as configurações a aplicação para iniciar o deploy
+      include_role:
+        name: django_app
+      vars:
+        app_alias: "{{ admin_app_alias }}"
+        app_name: "{{ admin_app_name }}"
+        app_host: "{{ admin_app_host }}"
+        app_port: "{{ admin_app_port }}"
+        app_version: "{{ admin_app_version }}"
+        app_server_host: "{{ admin_host }}"
+        app_server_internal_host: "{{ admin_internal_host }}"
+        client_id: "{{ admin_client_id }}"
+        client_secret: "{{ admin_client_secret }}"
+        database_host: "{{ admin_database_host }}"
+        database_port: "{{ admin_database_port }}"
+        database_name: "{{ admin_database_name }}"
+        database_user: "{{ admin_database_user }}"
+        database_password: "{{ admin_database_password }}"
+        django_folder: "{{ admin_django_folder }}"
+        django_secret_key: "{{ admin_django_secret_key }}"
+        django_settings: "{{ admin_django_settings }}"
+        redis_database: "{{ admin_redis_database }}"
+        redis_host: "{{ admin_redis_host }}"
+        redis_port: "{{ admin_redis_port }}"
+        stats_port: "{{ admin_stats_port }}"
+        has_celery: "{{ admin_has_celery }}"
+  tags: [ 'admin' ]
+
+
+- name: Instala o Site
+  hosts: "*"
+  tasks:
+    - name: Enviando as configurações a aplicação para iniciar o deploy
+      include_role:
+        name: django_app
+      vars:
+        app_alias: "{{ site_app_alias }}"
+        app_name: "{{ site_app_name }}"
+        app_host: "{{ site_host }}"
+        app_port: "{{ site_app_port }}"
+        app_version: "{{ site_app_version }}"
+        app_server_host: "{{ site_host }}"
+        app_server_internal_host: "{{ site_internal_host }}"
+        client_id: "{{ site_client_id }}"
+        client_secret: "{{ site_client_secret }}"
+        database_host: "{{ site_database_host }}"
+        database_port: "{{ site_database_port }}"
+        database_name: "{{ site_database_name }}"
+        database_user: "{{ site_database_user }}"
+        database_password: "{{ site_database_password }}"
+        django_folder: "{{ site_django_folder }}"
+        django_secret_key: "{{ site_django_secret_key }}"
+        django_settings: "{{ site_django_settings }}"
+        redis_database: "{{ site_redis_database }}"
+        redis_host: "{{ site_redis_host }}"
+        redis_port: "{{ site_redis_port }}"
+        stats_port: "{{ site_stats_port }}"
+        has_celery: "{{ site_has_celery }}"
+        has_www_redirect: "{{ site_has_www_redirect }}"
+  tags: [ 'site' ]

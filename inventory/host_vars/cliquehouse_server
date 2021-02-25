@@ -1,0 +1,155 @@
+route53_public:
+  - api.clubecliquehouse.com.br
+
+env_name: cliquehouse_api
+instance_name: cliquehouse_api
+ebs_name: cliquehouse_staging.data
+ebs_size: 10
+
+letsencrypt_registration_email: admin@cliquehouse.com.br
+python_version: 3.8.0
+
+base_domain_server_host: cliquehouse.com.br
+
+api_host: api.cliquehouse.com.br
+api_internal_host: api.cliquehouse.com.br
+api_app_name: api
+api_app_alias: api
+api_app_host: 127.0.0.1
+api_app_port: 8001
+api_app_version: 1.0.0
+api_client_id: cliquehouse-api
+api_client_secret: ''
+api_database_host: 'localhost'
+api_database_port: 5432
+api_database_name: cliquehouse_api
+api_database_user: cliquehouse_api
+api_database_password: cliquehouse_api
+api_django_folder: django
+api_django_secret_key: "#&^q^pv)-7*g(sf_a^huty$7i*ux3t$vfs@h%kxee9c)oggz0_"
+api_django_settings: property_api
+api_redis_database: 1
+api_redis_host: localhost
+api_redis_port: 6379
+api_stats_port: 9001  # uwsgi stats port
+api_has_celery: yes
+
+admin_host: admin.cliquehouse.com.br
+admin_internal_host: admin.cliquehouse.com.br
+admin_app_name: admin
+admin_app_alias: admin
+admin_app_host: 127.0.0.1
+admin_app_port: 8002
+admin_app_version: 1.0.0
+admin_database_host: localhost
+admin_database_port: 5432
+admin_database_name: cliquehouse_admin
+admin_database_user: cliquehouse_admin
+admin_database_password: cliquehouse_admin
+admin_django_folder: django
+admin_django_secret_key: "vmnycb8$8l+tbx0!bu)gt(=*funxb*c-&gqz$=mxv7=+@ur$uw"
+admin_django_settings: property_admin
+admin_redis_database: 2
+admin_redis_host: localhost
+admin_redis_port: 6379
+admin_stats_port: 9002  # uwsgi stats port
+admin_has_celery: no
+
+
+site_host: www.cliquehouse.com.br
+site_internal_host: www.cliquehouse.com.br
+site_app_name: site
+site_app_alias: site
+site_app_host: 127.0.0.1
+site_app_port: 8003
+site_app_version: 1.0.0
+site_client_id: supplai-site
+site_client_secret: ''
+site_database_host: localhost
+site_database_port: 5432
+site_database_name: cliquehouse_site
+site_database_user: cliquehouse_site
+site_database_password: cliquehouse_site
+site_django_folder: django
+site_django_secret_key: "vmnycb8$8l+tbx0!bu)gt(=*funxb*c-&gqz$=mxv7=+@ur$uw"
+site_django_settings: property_site
+site_redis_database: 3
+site_redis_host: localhost
+site_redis_port: 6379
+site_stats_port: 9003  # uwsgi stats port
+site_has_celery: yes
+site_has_www_redirect: yes
+
+cliquehouse_api_base_url: https://api.cliquehouse.com.br
+cliquehouse_api_access_token: "38d8005c88d470af0db2c355d42ac7a5bf433707"
+
+push_notification_api_token: ZGNmZWQzMmItOGQ2Zi00MGJlLTkyMmQtNDU4MmUzNmI2NTIz
+push_notification_app_id: 78cf6173-6eca-4be9-aec5-026be031a80a
+
+
+email_admin: "contato@cliquehouse.com.br"
+email_sac: "contato@cliquehouse.com.br"
+email_help_desk: "contato@cliquehouse.com.br"
+email_host: "smtp.gmail.com"
+email_port: 587
+email_host_user: "contato@cliquehouse.com.br"
+email_host_password: "!@#123Abc123"
+
+
+postgresql_users:
+  - name: "{{ api_database_user }}"
+    password: "{{ api_database_password }}"
+    role_attr_flags: "LOGIN,SUPERUSER"
+    encrypted: yes
+  - name: "{{ admin_database_user }}"
+    password: "{{ admin_database_password }}"
+    role_attr_flags: "LOGIN,SUPERUSER"
+    encrypted: yes
+  - name: "{{ site_database_user }}"
+    password: "{{ site_database_password }}"
+    role_attr_flags: "LOGIN,SUPERUSER"
+    encrypted: yes
+
+postgresql_databases:
+  - {
+    name: "{{ api_database_name }}",
+    template: "template0",
+    encoding: "UTF8",
+    lc_collate: "en_US.UTF-8",
+    lc_ctype: "en_US.UTF-8",
+    owner: "{{ api_database_user }}"
+  }
+  - {
+    name: "{{ admin_database_name }}",
+    template: "template0",
+    encoding: "UTF8",
+    lc_collate: "en_US.UTF-8",
+    lc_ctype: "en_US.UTF-8",
+    owner: "{{ admin_database_user }}"
+  }
+  - {
+    name: "{{ site_database_name }}",
+    template: "template0",
+    encoding: "UTF8",
+    lc_collate: "en_US.UTF-8",
+    lc_ctype: "en_US.UTF-8",
+    owner: "{{ site_database_user }}"
+  }
+
+postgresql_hba_entries:
+  - { type: local, database: all, user: postgres, auth_method: peer }
+  - { type: local, database: all, user: all, auth_method: peer }
+  - { type: host, database: all, user: all, address: '127.0.0.1/32', auth_method: trust }
+  - { type: host, database: all, user: all, address: '::1/128', auth_method: trust }
+
+
+# PostgreSQL parameters which will appears in the postgresql.conf. Be aware, some parameters from newer postgresql versions, does not supported in the elder postrgesql versions, and may lead to the case when postgresql service does not start
+postgresql_global_config_options:
+  - option: listen_addresses
+    value: "*"
+  - option: max_connections
+    value: 30
+  - option: shared_buffers
+    value: 64MB
+  - option: work_mem
+    value: 96MB

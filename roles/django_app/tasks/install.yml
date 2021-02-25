@@ -6,7 +6,6 @@
 
   - name: Criação do script de instalação
     become: yes
-    become_user: {{ company_slug }}
     template:
       src=install.sh
       dest=/opt/{{ company_slug }}/releases/{{ release_name }}/bin/install.sh

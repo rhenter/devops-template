@@ -9,7 +9,7 @@
 #
 #  - name: Instalar python 3.6
 #    become: yes
-#    become_user: {{ company_slug }}
+#    become_user: "{{ company_slug }}"
 #    unarchive: src=python-3.6.2.tar.gz dest=/opt/{{ company_slug }}/runtime/ remote_src=no
 #    when: tmp_py36.stat.exists == False
     - name: "Instala o PIP para todos os usuarios"

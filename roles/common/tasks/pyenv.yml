@@ -1,36 +1,52 @@
 ---
-  - name: Criar /opt/{{ company_slug }}/runtime
-    become: yes
-    file: path=/opt/{{ company_slug }}/runtime state=directory owner={{ company_slug }} group={{ company_slug }}
+- name: Criar /opt/{{ company_slug }}/runtime
+  become: yes
+  file: path=/opt/{{ company_slug }}/runtime state=directory owner={{ company_slug }} group={{ company_slug }}
 
-  - name: git clone pyenv , pyenv-virtualenv
-    become_user: {{ company_slug }}
-    git:
-      repo: '{{ item.repo }}'
-      dest: '{{ item.dest }}'
-    register: RESULT
-    with_items:
-      - repo: git://github.com/yyuu/pyenv.git
-        dest: /opt/{{ company_slug }}/runtime/pyenv
-      - repo: git://github.com/yyuu/pyenv-virtualenv.git
-        dest: /opt/{{ company_slug }}/runtime/pyenv/plugins/pyenv-virtualenv
-  - name: results
-    debug: var=RESULT.results
+- name: git clone pyenv , pyenv-virtualenv
+  become: yes
+  git:
+    repo: '{{ item.repo }}'
+    dest: '{{ item.dest }}'
+  register: RESULT
+  ignore_errors: yes
+  with_items:
+    - repo: git://github.com/yyuu/pyenv.git
+      dest: /opt/{{ company_slug }}/runtime/pyenv
+    - repo: git://github.com/yyuu/pyenv-virtualenv.git
+      dest: /opt/{{ company_slug }}/runtime/pyenv/plugins/pyenv-virtualenv
+- name: results
+  debug: var=RESULT.results
 
-  - name: "install pyenv and python ver.{{ python_ver }}"
-    become_user: {{ company_slug }}
-    shell: '{{ item.cmd }}'
-    register: RESULT
-    with_items:
-      - cmd: echo 'export PYENV_ROOT="/opt/{{ company_slug }}/runtime/pyenv"' >> ~/.bashrc
-      - cmd: echo 'if [ -d "${PYENV_ROOT}" ]; then' >> ~/.bashrc
-      - cmd: echo '    export PATH=${PYENV_ROOT}/bin:$PATH' >> ~/.bashrc
-      - cmd: echo '    eval "$(pyenv init -)"' >> ~/.bashrc
-      - cmd: echo 'fi' >> ~/.bashrc
-      - cmd: source ~/.bashrc; pyenv -v
-      - cmd: source ~/.bashrc; python -V
-      - cmd: source ~/.bashrc; pyenv install '{{ python_version }}'
-      - cmd: source ~/.bashrc; pyenv global '{{ python_version }}'
-      - cmd: source ~/.bashrc; python -V
-  - name: results
-    debug: var=RESULT.results
+- name: "Dar permissão para todos os usarios usarem"
+  become: yes
+  shell: chmod -R 777 /opt/{{ company_slug }}/runtime
+
+- name: Verifica se o PYENV_ROOT ja esta no arquivo .bashrc
+  become: yes
+  command: grep -Fxq "PYENV_ROOT" ~/.bashrc
+  register: checkmyconf
+  check_mode: no
+  ignore_errors: yes
+  changed_when: no
+
+- name: "install pyenv"
+  become: yes
+  shell: echo -e 'export PYENV_ROOT="/opt/{{ company_slug }}/runtime/pyenv"\nexport PATH=${PYENV_ROOT}/bin:$PATH \neval "$(pyenv init -)"\neval "$(pyenv virtualenv-init -)"' >> ~/.bashrc
+  args:
+    executable: /bin/bash
+  when: checkmyconf.rc == 0
+
+- name: "Instala python ver.{{ python_ver }} e virtualenv"
+  become: yes
+  shell: '{{ item.cmd }}'
+  register: RESULT
+  with_items:
+    - cmd: source ~/.bashrc; pyenv -v
+    - cmd: source ~/.bashrc; python -V
+    - cmd: source ~/.bashrc; pyenv install {{ python_version }}
+    - cmd: source ~/.bashrc; pyenv global {{ python_version }}
+    - cmd: source ~/.bashrc; python -V
+    - cmd: source ~/.bashrc; pip install virtualenv
+- name: results
+  debug: var=RESULT.results

@@ -26,7 +26,7 @@
 
   - name: Descompacta release desejada da aplicação
     become: yes
-    become_user: {{ company_slug }}
+    become_user: "{{ company_slug }}"
     unarchive:
       src="{{ release_file }}"
       dest="/opt/{{ company_slug }}/releases/{{ release_name }}"

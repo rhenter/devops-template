@@ -1,0 +1,80 @@
+route53_public:
+  - api.clubeexample.com.br
+
+env_name: example_api
+instance_name: example_api
+ebs_name: example_staging.data
+ebs_size: 10
+
+letsencrypt_registration_email: admin@example.com.br
+python_version: 3.8.0
+
+base_domain_server_host: example.com.br
+
+project_host: www.example.com.br
+project_internal_host: project.example.com.br
+project_app_name: project
+project_app_alias: project
+project_app_host: 127.0.0.1
+project_app_port: 8001
+project_app_version: 1.0.0
+project_client_id: example-project
+project_client_secret: ''
+project_database_host: 'localhost'
+project_database_port: 5432
+project_database_name: example_project
+project_database_user: example_project
+project_database_password: example_project
+project_django_folder: django
+project_django_secret_key: "#&^q^pv)-7*g(sf_a^huty$7i*ux3t$vfs@h%kxee9c)oggz0_"
+project_django_settings: property_project
+project_redis_database: 1
+project_redis_host: localhost
+project_redis_port: 6379
+project_stats_port: 9001  # uwsgi stats port
+project_has_celery: yes
+site_has_www_redirect: yes
+
+
+email_admin: "contato@example.com.br"
+email_sac: "contato@example.com.br"
+email_help_desk: "contato@example.com.br"
+email_host: "smtp.gmail.com"
+email_port: 587
+email_host_user: "contato@example.com.br"
+email_host_password: ""
+
+
+postgresql_users:
+  - name: "{{ project_database_user }}"
+    password: "{{ project_database_password }}"
+    role_attr_flags: "LOGIN,SUPERUSER"
+    encrypted: yes
+
+postgresql_databases:
+  - {
+    name: "{{ project_database_name }}",
+    template: "template0",
+    encoding: "UTF8",
+    lc_collate: "en_US.UTF-8",
+    lc_ctype: "en_US.UTF-8",
+    owner: "{{ api_database_user }}"
+  }
+
+postgresql_hba_entries:
+  - { type: local, database: all, user: postgres, auth_method: peer }
+  - { type: local, database: all, user: all, auth_method: peer }
+  - { type: host, database: all, user: all, address: '127.0.0.1/32', auth_method: trust }
+  - { type: host, database: all, user: all, address: '::1/128', auth_method: trust }
+
+
+# PostgreSQL parameters which will appears in the postgresql.conf. Be aware, some parameters from newer postgresql versions, does not supported in the elder postrgesql versions, and may lead to the case when postgresql service does not start
+postgresql_global_config_options:
+  - option: listen_addresses
+    value: "*"
+  - option: max_connections
+    value: 30
+  - option: shared_buffers
+    value: 64MB
+  - option: work_mem
+    value: 96MB

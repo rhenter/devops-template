@@ -6,9 +6,9 @@ ntp_enabled: true
 ntp_timezone: America/Sao_Paulo
 
 operation_team:
-  - rafaelhenter
+  - user_name
 
 removed_users: []
 
-
-company_slug: cliquehouse
+# Company's name that will be used on all env
+company_slug: company_name
